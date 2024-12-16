@@ -1,0 +1,96 @@
+﻿@model Item
+@{
+    Layout = "_Layout";
+}
+<h3 style="color : brown">Add New Item</h3>
+<div class="col-4">
+    <form asp-action="Edit" id="CompanyForm" method="post">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input asp-for="item_id" id="item_id" class="form-control" placeholder="Enter Item" hidden>
+
+        <div class="mb-3">
+            <label asp-for="item_name" class="form-label"><b>Enter Item Name</b></label>
+            <input asp-for="item_name" id="item_id" type="text" class="form-control" placeholder="Enter Item">
+            <span asp-validation-for="item_name" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="cat_id" class="form-label"><b>Category ID</b></label>
+            <select asp-for="cat_id" class="form-control" id="cat_id" style="width: 100%;">
+                <option value="">Select A Category</option>
+            </select>
+            <span asp-validation-for="cat_id" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="item_des " class="form-label"><b>Enter Item Description</b></label>
+            <input asp-for="item_des " id="item_id" type="text" class="form-control" placeholder="Enter Item Descrption">
+            <span asp-validation-for="item_des " class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="brand" class="form-label"><b>Enter Item Brand Name</b></label>
+            <input asp-for="brand" id="item_id" type="text" class="form-control" placeholder="Enter Item Brand Name">
+            <span asp-validation-for="brand" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="unit_price" class="form-label"><b>Enter Item Unit Name</b></label>
+            <input asp-for="unit_price" id="item_id" type="text" class="form-control" placeholder="Enter Item unit_price">
+            <span asp-validation-for="unit_price" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="qty" class="form-label"><b>Enter Item Quantity</b></label>
+            <input asp-for="qty" id="item_id" type="text" class="form-control" placeholder="Enter Quantity">
+            <span asp-validation-for="qty" class="text-danger"></span>
+        </div>
+
+
+        <button type="submit" class="btn btn-outline-primary">Save</button>
+        <button type="reset" class="btn btn-secondary">Clear</button>
+
+    </form>
+</div>
+
+@section Scripts {
+    <!-- jQuery and Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            // Load Categories on Page Load
+            GetCategories();
+        });
+
+               // Fetch categories via AJAX and populate the dropdown
+        function GetCategories() {
+            $.ajax({
+                url: '/Item/GetCategories',
+                method: 'GET',
+                success: function (response) {
+                    $('#cat_id').empty(); // Clear previous options
+                    $('#cat_id').append('<option value="">Select A Category</option>'); // Default option
+                    $.each(response, function (index, category) {
+                        $('#cat_id').append('<option value="' + category.cat_id + '">' + category.cat_name + '</option>');
+                    });
+
+                    // Check if the Model has a selected category and set it
+                    var selectedCatId = '@Model.cat_id'; // Get the selected category id from the model
+                    if (selectedCatId > 0) {
+                        $('#cat_id').val(selectedCatId); // Set the selected value of the dropdown
+                    }
+                },
+                error: function (error) {
+                    alert("Error loading categories: " + error.responseText);
+                }
+            });
+        }
+
+    </script>
+}
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}

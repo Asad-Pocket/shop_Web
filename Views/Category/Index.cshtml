@@ -1,0 +1,184 @@
+﻿@model List<Category>
+@{
+    Layout = "_Layout";
+}
+
+<h3 style="color : brown">Add New Category</h3>
+<div class="col-4">
+    <form asp-action="Index" id="addCompanyForm" method="post">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="mb-3">
+            <label class="form-label"><b>Enter Catehgory Name</b></label>
+            <input id="cat_name" type="text" class="form-control" placeholder="Enter Category">
+        </div>
+
+        <button type="button" onclick="insertData()" class="btn btn-outline-primary">Save</button>
+
+    </form>
+
+    <p>
+
+    </p>
+</div>
+
+
+<div class="row m-0 ps-4 upper-form-style pt-2">
+    <div class="col-12 text-center">
+        <h3 style="color: brown; font-weight: 600;">Show All Category</h3>
+    </div><p>
+
+    </p>
+    <div id="tableContainer" class="col-12"></div>
+</div>
+
+
+@section Scripts {
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+
+    <script>
+        $(document).ready(function () {
+          
+            initializeOrUpdateTable();
+        });
+
+        function initializeOrUpdateTable(){
+             table = new Tabulator("#tableContainer", {
+                data: @Html.Raw(Json.Serialize(Model)),
+                layout: "fitColumns",
+                pagination: true,
+                paginationSize: 5,
+                paginationCounter: "rows",
+                columns: [
+                    {
+                        title: "ID", field: "cat_id", hozAlign: "center",
+                    },
+                    {
+                        title: "Name", field: "cat_name", headerFilter: "input",
+                        headerFilterLiveFilter: true,
+                        hozAlign: "center",
+                    },
+                    {
+                        title: "Actions",
+                        formatter: function (cell, formatterParams, onRendered) {
+                            var rowData = cell.getRow().getData();
+
+                            var actionContainer = document.createElement("div");
+                            actionContainer.className = "text-nowrap";
+
+                            // Edit Button
+                            var editSpan = document.createElement("span");
+                            editSpan.setAttribute("data-toggle", "tooltip");
+                            editSpan.setAttribute("title", "Edit");
+
+                            var editButton = document.createElement("button");
+                            editButton.className = "fas fa-edit btn btn-warning btn-xs";
+                            editButton.onclick = function () {
+                                editRow(rowData.cat_id);
+                            };
+                            editSpan.appendChild(editButton);
+                            actionContainer.appendChild(editSpan);
+
+                            actionContainer.appendChild(document.createTextNode("\u00A0\u00A0"));
+
+                            // Delete Button
+                            var deleteSpan = document.createElement("span");
+                            deleteSpan.setAttribute("data-toggle", "tooltip");
+                            deleteSpan.setAttribute("title", "Delete");
+
+                            var deleteButton = document.createElement("button");
+                            deleteButton.className = "far fa-trash-alt btn btn-danger btn-xs";
+                            deleteButton.onclick = function () {
+                                deleteRow(rowData.cat_id);
+                            };
+                            deleteSpan.appendChild(deleteButton);
+                            actionContainer.appendChild(deleteSpan);
+
+                            return actionContainer;
+                        },
+                        hozAlign: "center",
+                        width: 120,
+                      
+                    },
+                ],
+            });
+        }
+
+        function insertData() {
+            var catName = $("#cat_name").val();
+            
+            if (catName.trim() === "") {
+                alert("Category name cannot be empty");
+                return; // Exit function early
+            }
+
+            $.ajax({
+                url: '/Category/Create',
+                method: 'Post',
+                data: {
+                    _cat: catName,
+                },
+                success: function () {
+                    initializeOrUpdateTable();
+                    window.location.href = 'Category';
+                },
+                error: function (error) {
+                    console.error('Error data:', error);
+                }
+            });
+        }
+
+        function formatDate(date) {
+            var months = [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+            if (date == "") {
+                date = new Date();
+            } else {
+                date = new Date(date)
+            }             // Convert date to Date object if it's not already
+            var formattedDate;
+            if (date instanceof Date) {
+                var day = date.getDate();
+                var monthIndex = date.getMonth();
+                var year = date.getFullYear();
+                formattedDate = day + "-" + months[monthIndex] + "-" + year;
+            } else {
+                formattedDate = "Invalid Date";
+            }
+
+            return formattedDate;
+        }
+        function editRow(id) {
+            var cat = id;
+            window.location.href = '/Category/Edit?cat_id=' + cat;
+        }
+
+        function deleteRow(id) {
+
+            var Confirmation = confirm("Are you sure? You want delete..!!")
+            if (Confirmation) {
+                $.ajax({
+                    url: '/Category/Delete',
+                    method: 'Post',
+                    data: {
+                        cat_id: id,
+                    },
+                    success: function () {
+                        alert("Data is Deleted successfully");
+                        window.location.href = 'Category';
+                    },
+                    error: function (error) {
+                        console.error('Error data:', error);
+                    }
+                });
+            }
+        }
+    </script>
+}
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}

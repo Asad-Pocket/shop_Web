@@ -1,0 +1,25 @@
+﻿@model Category
+@{
+    Layout = "_Layout";
+}
+<h3 style="color : brown">Add New Category</h3>
+<div class="col-4">
+    <form asp-action="Edit" id="CompanyForm" method="post">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input asp-for="cat_id" id="cat_id" class="form-control" placeholder="Enter Category" hidden>
+
+        <div class="mb-3">
+            <label asp-for="cat_name" class="form-label"><b>Enter Category Name</b></label>
+            <input asp-for="cat_name" id="cat_name" type="text" class="form-control" placeholder="Enter Category">
+            <span asp-validation-for="cat_name" class="text-danger"></span>
+        </div>
+
+        <button type="submit"  class="btn btn-outline-primary">Save</button>
+        <button type="reset"  class="btn btn-secondary">Clear</button>
+
+    </form>
+</div>
+
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}

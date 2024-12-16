@@ -1,0 +1,146 @@
+﻿@model Dictionary<string, List<Card>>
+
+@{
+    ViewData["Title"] = "Product Collections";
+
+    // Retrieve the search query from the query string
+    var searchQuery = ViewContext.HttpContext.Request.Query["query"].ToString();
+}
+<style>
+    /* Google Fonts */
+    <head >
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" >
+    </head >
+    /* General Styling */
+    body {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* App Name Header */
+    .app-header {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    /* Category Titles */
+    .category-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .category-subtitle {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #666;
+    }
+
+    /* Card Styling */
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+    }
+
+    .card-text {
+        font-size: 1rem;
+        color: #444;
+    }
+
+    /* Search Bar Styling */
+    form input[type="text"] {
+        font-weight: bold;
+        border-radius: 4px;
+        padding: 10px;
+    }
+
+    form button {
+        white-space: nowrap;
+    }
+</style>
+<!-- App Name Header -->
+@* /<h1 class="app-header text-center my-4">Your Choice</h1> *@
+<a href="~/Home/Index" class="app-header text-center my-4" style="text-decoration: none; display: block;">Your Choice</a>
+
+<!-- Search Bar -->
+<form asp-action="Index" method="get" class="d-flex mb-4">
+    <input type="text" name="query" class="form-control fw-bold me-2" placeholder="Search for items..." style="border: 2px solid #ccc;">
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+
+<!-- Product Collections -->
+<div class="container mt-5">
+    @foreach (var collection in Model)
+    {
+        if (collection.Value.Any())
+        {
+            <!-- Category Title -->
+            <div class="text-center my-4">
+                <h2 class="category-title">@collection.Key</h2>
+                <p class="category-subtitle">Explore our exclusive @collection.Key collection!</p>
+            </div>
+
+            <!-- Category Cards -->
+            <div class="row g-4">
+                @foreach (var item in collection.Value)
+                {
+                    <div class="col-md-4" id>
+                        <div class="card h-100">
+                            <div class="card-img-top" style="aspect-ratio: 16/9; overflow: hidden;">
+                                <img src="@item.ImageUrl"
+                                     alt="@item.Title"
+                                     style="width: 100%; height: 100%; object-fit: cover;"
+                                     onerror="this.src='https://via.placeholder.com/300';">
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">@item.Title</h5>
+                                <p class="card-text">@item.Description</p>
+                                <a href="#" class="btn btn-primary">Learn More</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@section scripts {
+
+    <!-- Include Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            // Load Categories on Page Load
+            GetCategories();
+
+             // Initialize Select2
+            $('#cat_id').select2({
+                placeholder: "Select A Category",
+                allowClear: true
+            });
+        });
+
+        // Fetch categories via AJAX and populate the dropdown
+        function GetCategories() {
+            $.ajax({
+                url: '/Item/GetCategories',
+                method: 'GET',
+                success: function (response) {
+                    $('#cat_id').empty(); // Clear previous options
+                    $('#cat_id').append('<option value="">Select A Category</option>'); // Default option
+                    $.each(response, function (index, category) {
+                        $('#cat_id').append('<option value="' + category.cat_id + '">' + category.cat_name + '</option>');
+                    });
+                },
+                error: function (error) {
+                    alert("Error loading categories: " + error.responseText);
+                }
+            });
+        }
+    </script>
+}
+
+
